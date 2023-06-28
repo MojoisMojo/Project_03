@@ -512,6 +512,16 @@ class QueenAnt(ScubaThrower):  # You should change this line
     implemented = True   # Change to True to view in the GUI
     is_existed = False
     # END Problem 12
+    
+    # BEGIN Problem 12
+    def __init__(self, health=1):
+        super().__init__(health)
+        if QueenAnt.is_existed:
+            self.fate = True
+        else:
+            self.fate = False
+            QueenAnt.is_existed = True
+    # END Problem 12
 
     @classmethod
     def construct(cls, gamestate):
@@ -522,7 +532,6 @@ class QueenAnt(ScubaThrower):  # You should change this line
         # BEGIN Problem 12
         if cls.is_existed:
             return None
-        cls.is_existed = True
         return super().construct(gamestate)
         # END Problem 12
 
@@ -728,8 +737,9 @@ class LaserAnt(ThrowerAnt):
     name = 'Laser'
     food_cost = 10
     # OVERRIDE CLASS ATTRIBUTES HERE
+    damage = 2
     # BEGIN Problem Optional 2
-    implemented = False   # Change to True to view in the GUI
+    implemented = True   # Change to True to view in the GUI
     # END Problem Optional 2
 
     def __init__(self, health=1):
@@ -738,12 +748,20 @@ class LaserAnt(ThrowerAnt):
 
     def insects_in_front(self):
         # BEGIN Problem Optional 2
-        return {}
+        cur_range,cur_place = 0,self.place
+        insect_dict = {}
+        while not cur_place.is_hive:
+            if cur_place.ant and isinstance(cur_place.ant,LaserAnt):
+                insect_dict[cur_place.ant] = cur_range
+            for bee in cur_place.bees:
+                insect_dict[bee] = cur_range
+            cur_place, cur_range = cur_place.entrance, cur_range + 1
+        return insect_dict
         # END Problem Optional 2
 
     def calculate_damage(self, distance):
         # BEGIN Problem Optional 2
-        return 0
+        return max(0,self.damage - distance*0.25 - self.insects_shot * 0.0625)
         # END Problem Optional 2
 
     def action(self, gamestate):
